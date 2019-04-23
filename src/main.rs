@@ -16,18 +16,18 @@ impl Block {
 }
 
 #[derive(Clone)]
-struct Blockchain<'a> {
-    chain: &'a mut Vec<Block>
+struct Blockchain {
+    chain: Vec<Block>
 }
 
-impl<'a> Blockchain<'a>{
+impl Blockchain{
     fn add_block(&mut self, block: Block) {
         self.chain.push(block)
     }
 
     fn print(&self){
-        for b in self.chain.iter_mut(){
-            println!("{}",b.to_string());
+        for b in self.chain.iter(){
+            println!("{}",b.data);
         }
     }
 }
@@ -39,7 +39,9 @@ fn main() {
         hash: "".to_string()
     };
 
-    b.calc_hash();
+    let mut bc = Blockchain{ chain : Vec::new()};
 
-    println!("{}", b.to_string());
+    bc.add_block(b);
+
+    bc.print();
 }
