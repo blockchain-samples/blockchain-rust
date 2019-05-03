@@ -6,6 +6,14 @@ struct Block {
 }
 
 impl Block {
+    fn new(data: u32) -> Block{
+        Block{
+            data,
+            previous_hash: "".to_string(),
+            hash: "".to_string()
+        }
+    }
+
     fn to_string(&self) -> String {
         format!("data {}", self.data)
     }
@@ -21,27 +29,37 @@ struct Blockchain {
 }
 
 impl Blockchain{
+    fn new() -> Blockchain{
+        let mut b = Block::new(0);
+        b.calc_hash();
+
+        Blockchain{
+            chain: vec![b]
+        }
+    }
+
     fn add_block(&mut self, block: Block) {
+
         self.chain.push(block)
     }
 
     fn print(&self){
+        println!("blockchain({})", self.chain.len());
         for b in self.chain.iter(){
-            println!("{}",b.data);
+            println!("{} - {} - {}",b.data, b.hash, b.previous_hash);
         }
     }
 }
 
 fn main() {
-    let mut b = Block{
-        data: 1,
-        previous_hash: "".to_string(),
-        hash: "".to_string()
-    };
+    let mut b1 = Block::new(1);
+    let mut b2 = Block::new(2);
 
-    let mut bc = Blockchain{ chain : Vec::new()};
+    let mut bc = Blockchain::new();
 
-    bc.add_block(b);
+    bc.print();
+
+    bc.add_block(b1);
 
     bc.print();
 }
