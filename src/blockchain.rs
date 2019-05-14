@@ -17,7 +17,7 @@ impl Blockchain{
     }
 
     fn add_genesis_block(&mut self) {
-        let mut b = Block::new(0);
+        let mut b = Block::new(None);
         b.set_previous_hash("".to_string());
         b.set_hash();
 

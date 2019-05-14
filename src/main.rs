@@ -1,12 +1,14 @@
 mod block;
 mod blockchain;
+mod transaction;
 
 use block::Block;
 use blockchain::Blockchain;
+use transaction::Transaction;
 
 fn main() {
-    let mut b1 = Block::new(1);
-    let mut b2 = Block::new(2);
+    let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
+    let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
     let mut bc = Blockchain::new();
 
     bc.print();
@@ -21,7 +23,7 @@ fn main() {
 
     println!("{}", bc.is_valid());
 
-    bc.chain[1].data = 10;
+    bc.chain[1].data = Some(Transaction::new("a".to_string(), "b".to_string(), 10));
 
     println!("{}", bc.is_valid());
 }

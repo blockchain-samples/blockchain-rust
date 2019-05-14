@@ -5,9 +5,11 @@ use self::crypto::sha2::Sha256;
 use self::crypto::digest::Digest;
 use std::time::Instant;
 
+use crate::Transaction;
+
 #[derive(Clone)]
 pub struct Block {
-    pub data: u32,
+    pub data: Option<Transaction>,
     pub previous_hash: String,
     pub hash: String,
     pub nonce: u32,
@@ -15,7 +17,7 @@ pub struct Block {
 }
 
 impl Block {
-    pub fn new(data: u32) -> Block{
+    pub fn new(data: Option<Transaction>) -> Block{
         Block{
             data,
             previous_hash: "".to_string(),
@@ -26,13 +28,24 @@ impl Block {
     }
 
     pub fn print(&self){
-        println!("\tBlock{{\n\t\tdata: {}\n\t\thash: {}\n\t\tprevious_hash: {}\n\t\tnonce: {}\n\t\ttime_mining: {}ms\n\t}},",
-                 self.data, &self.hash, &self.previous_hash, self.nonce, self.time_mining);
+        match &self.data{
+            Some(t) => {
+                println!("\tBlock{{\n\t\tdata: {}\n\t\thash: {}\n\t\tprevious_hash: {}\n\t\tnonce: {}\n\t\ttime_mining: {}ms\n\t}},",
+                         t, &self.hash, &self.previous_hash, self.nonce, self.time_mining);
+            },
+            _ => {
+                println!("\tBlock{{\n\t\tdata: empty\n\t\thash: {}\n\t\tprevious_hash: {}\n\t\tnonce: {}\n\t\ttime_mining: {}ms\n\t}},",
+                         &self.hash, &self.previous_hash, self.nonce, self.time_mining);
+            }
+        }
     }
 
     pub fn calc_hash(&self) -> String{
         let mut sha256 = Sha256::new();
-        let hashable = format!("{}-{}-{}", self.data, self.previous_hash, self.nonce);
+        let hashable = match &self.data{
+            Some(t) => format!("{}-{}-{}", t, self.previous_hash, self.nonce),
+            _ => format!("empty-{}-{}", self.previous_hash, self.nonce)
+        };
         sha256.input_str(&hashable);
         let output = sha256.result_str();
         return output;
