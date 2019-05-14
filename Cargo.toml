@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 rust-crypto = "0.2.36"
+base64 = "0.10.1"
 
