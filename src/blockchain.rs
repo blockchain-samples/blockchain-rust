@@ -2,13 +2,15 @@ use crate::Block;
 
 #[derive(Clone)]
 pub struct Blockchain {
-    pub chain: Vec<Block>
+    pub chain: Vec<Block>,
+    difficulty: usize
 }
 
 impl Blockchain{
     pub fn new() -> Blockchain{
         let mut bc = Blockchain{
-            chain: vec![]
+            chain: vec![],
+            difficulty: 2
         };
         bc.add_genesis_block();
         bc
@@ -26,7 +28,7 @@ impl Blockchain{
         let h = self.chain.last().expect("chain should not be empty");
         let hash = h.clone().hash;
         block.set_previous_hash(hash);
-        block.set_hash();
+        block.mine(self.difficulty);
         self.chain.push(block.clone())
     }
 
