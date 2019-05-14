@@ -24,7 +24,7 @@ impl Block {
         println!("\tBlock{{\n\t\tdata: {}\n\t\thash: {}\n\t\tprevious_hash: {}\n\t}},",self.data, base64::encode(&self.hash), base64::encode(&self.previous_hash));
     }
 
-    pub fn calc_hash(&mut self) -> String{
+    pub fn calc_hash(&self) -> String{
         let mut sha256 = Sha256::new();
         let hashable = format!("{}-{}", self.data, self.previous_hash);
         sha256.input_str(&hashable);

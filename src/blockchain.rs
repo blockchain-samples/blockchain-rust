@@ -2,18 +2,24 @@ use crate::Block;
 
 #[derive(Clone)]
 pub struct Blockchain {
-    chain: Vec<Block>
+    pub chain: Vec<Block>
 }
 
 impl Blockchain{
     pub fn new() -> Blockchain{
+        let mut bc = Blockchain{
+            chain: vec![]
+        };
+        bc.add_genesis_block();
+        bc
+    }
+
+    fn add_genesis_block(&mut self) {
         let mut b = Block::new(0);
         b.set_previous_hash("".to_string());
         b.set_hash();
 
-        Blockchain{
-            chain: vec![b]
-        }
+        self.chain.push(b);
     }
 
     pub fn add_block(&mut self, block: &mut Block) {
@@ -30,5 +36,21 @@ impl Blockchain{
             b.print();
         }
         println!("]");
+    }
+
+    pub fn is_valid(&self) -> bool{
+        for i in 1..self.chain.len()-1 {
+            let block = &self.chain[i];
+            let previous_block = &self.chain[i - 1];
+
+            if block.hash != block.calc_hash() {
+                return false;
+            }
+
+            if block.previous_hash != previous_block.hash {
+                return false;
+            }
+        };
+        true
     }
 }

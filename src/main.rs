@@ -18,4 +18,10 @@ fn main() {
     bc.add_block(&mut b2);
 
     bc.print();
+
+    println!("{}", bc.is_valid());
+
+    bc.chain[1].data = 10;
+
+    println!("{}", bc.is_valid());
 }
