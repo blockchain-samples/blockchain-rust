@@ -4,7 +4,7 @@ use crate::transaction::Transaction;
 #[derive(Clone)]
 pub struct Blockchain {
     pub chain: Vec<Block>,
-    pub pendingTransactions: Vec<Transaction>,
+    pub pending_transactions: Vec<Transaction>,
     difficulty: usize
 }
 
@@ -12,7 +12,7 @@ impl Blockchain{
     pub fn new() -> Blockchain{
         let mut bc = Blockchain{
             chain: vec![],
-            pendingTransactions: vec![],
+            pending_transactions: vec![],
             difficulty: 2
         };
         bc.add_genesis_block();
@@ -20,19 +20,24 @@ impl Blockchain{
     }
 
     fn add_genesis_block(&mut self) {
-        let mut b = Block::new(None);
+        let mut b = Block::new(vec![]);
         b.set_previous_hash("".to_string());
-        b.set_hash();
+        b.mine(self.difficulty);
 
         self.chain.push(b);
     }
 
-    pub fn add_block(&mut self, block: &mut Block) {
+    fn add_block(&mut self, block: &mut Block) {
         let h = self.chain.last().expect("chain should not be empty");
         let hash = h.clone().hash;
         block.set_previous_hash(hash);
         block.mine(self.difficulty);
         self.chain.push(block.clone())
+    }
+
+    pub fn generate_block(&mut self) {
+        let mut block = Block::new(self.pending_transactions.clone());
+        self.add_block(&mut block);
     }
 
     pub fn print(&self){
@@ -44,7 +49,7 @@ impl Blockchain{
     }
 
     pub fn is_valid(&self) -> bool{
-        for i in 1..self.chain.len()-1 {
+        for i in 1..self.chain.len() {
             let block = &self.chain[i];
             let previous_block = &self.chain[i - 1];
 
@@ -58,6 +63,10 @@ impl Blockchain{
         };
         true
     }
+
+    pub fn add_to_pending(&mut self, transaction: Transaction){
+        self.pending_transactions.push(transaction);
+    }
 }
 
 #[cfg(test)]
@@ -67,26 +76,21 @@ mod tests{
     #[test]
     fn create_blockchain() {
         let bc = Blockchain::new();
-        let t = &bc.chain[0];
+        let genesis = &bc.chain[0];
 
-        assert!(match t.data {
-            None => true,
-            _ => false
-        });
+        assert_eq!(genesis.data.len(), 0);
+        assert_eq!(genesis.hash, genesis.calc_hash());
     }
 
     #[test]
     fn add_block() {
-        let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
-        let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
         let mut bc = Blockchain::new();
         assert_eq!(bc.chain.len(), 1);
 
-        bc.add_block(&mut b1);
+        bc.add_to_pending(Transaction::new("a".to_string(), "b".to_string(), 1));
+        bc.add_to_pending(Transaction::new("c".to_string(), "d".to_string(), 2));
+        bc.generate_block();
         assert_eq!(bc.chain.len(), 2);
-
-        bc.add_block(&mut b2);
-        assert_eq!(bc.chain.len(), 3);
     }
 
     #[test]
@@ -94,14 +98,13 @@ mod tests{
         let mut bc = Blockchain::new();
         assert!(bc.is_valid());
 
-        let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
-        let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
-        bc.add_block(&mut b1);
-        bc.add_block(&mut b2);
+        bc.add_to_pending(Transaction::new("a".to_string(), "b".to_string(), 1));
+        bc.add_to_pending(Transaction::new("c".to_string(), "d".to_string(), 2));
+        bc.generate_block();
         assert!(bc.is_valid());
 
         //tempering with the chain data
-        bc.chain[1].data = Some(Transaction::new("a".to_string(), "b".to_string(), 10));
+        bc.chain[1].data[0].coins = 100;
 
         assert!(!bc.is_valid());
     }

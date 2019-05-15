@@ -13,10 +13,14 @@ impl Transaction{
             from, to, coins
         }
     }
+
+    pub fn as_string(&self) -> String {
+        format!("from: {}\nto: {}\n:coins: {}", self.from, self.to, self.coins)
+    }
 }
 
 impl fmt::Display for Transaction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "(Transaction: {})", self.coins)
+        write!(f, "(Transaction: {}-{}-{})", self.from, self.to, self.coins)
     }
 }

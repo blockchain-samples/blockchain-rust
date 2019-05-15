@@ -7,23 +7,19 @@ use blockchain::Blockchain;
 use transaction::Transaction;
 
 fn main() {
-    let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
-    let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
     let mut bc = Blockchain::new();
 
-    bc.print();
-
-    bc.add_block(&mut b1);
-
-    bc.print();
-
-    bc.add_block(&mut b2);
+    bc.add_to_pending(Transaction::new("a".to_string(), "b".to_string(), 1));
+    bc.add_to_pending(Transaction::new("c".to_string(), "d".to_string(), 2));
+    bc.generate_block();
 
     bc.print();
-
     println!("{}", bc.is_valid());
+    println!("{}", bc.chain[1].calc_hash());
 
-    bc.chain[1].data = Some(Transaction::new("a".to_string(), "b".to_string(), 10));
+    bc.chain[1].data[0].coins = 100;
+    println!("{}", bc.chain[1].calc_hash());
 
+    bc.print();
     println!("{}", bc.is_valid());
 }
