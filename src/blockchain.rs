@@ -1,8 +1,10 @@
 use crate::Block;
+use crate::transaction::Transaction;
 
 #[derive(Clone)]
 pub struct Blockchain {
     pub chain: Vec<Block>,
+    pub pendingTransactions: Vec<Transaction>,
     difficulty: usize
 }
 
@@ -10,6 +12,7 @@ impl Blockchain{
     pub fn new() -> Blockchain{
         let mut bc = Blockchain{
             chain: vec![],
+            pendingTransactions: vec![],
             difficulty: 2
         };
         bc.add_genesis_block();
@@ -54,5 +57,52 @@ impl Blockchain{
             }
         };
         true
+    }
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn create_blockchain() {
+        let bc = Blockchain::new();
+        let t = &bc.chain[0];
+
+        assert!(match t.data {
+            None => true,
+            _ => false
+        });
+    }
+
+    #[test]
+    fn add_block() {
+        let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
+        let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
+        let mut bc = Blockchain::new();
+        assert_eq!(bc.chain.len(), 1);
+
+        bc.add_block(&mut b1);
+        assert_eq!(bc.chain.len(), 2);
+
+        bc.add_block(&mut b2);
+        assert_eq!(bc.chain.len(), 3);
+    }
+
+    #[test]
+    fn validation() {
+        let mut bc = Blockchain::new();
+        assert!(bc.is_valid());
+
+        let mut b1 = Block::new(Some(Transaction::new("a".to_string(), "b".to_string(), 1)));
+        let mut b2 = Block::new(Some(Transaction::new("b".to_string(), "c".to_string(), 2)));
+        bc.add_block(&mut b1);
+        bc.add_block(&mut b2);
+        assert!(bc.is_valid());
+
+        //tempering with the chain data
+        bc.chain[1].data = Some(Transaction::new("a".to_string(), "b".to_string(), 10));
+
+        assert!(!bc.is_valid());
     }
 }
